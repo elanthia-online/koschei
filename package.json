@@ -1,5 +1,5 @@
 {
-  "name": "koschei",
+  "name": "@elanthia/koschei",
   "version": "0.0.0",
   "description": "A bridge between the Lich-runtime and a Node.js runtime",
   "main": "dist/index.js",
