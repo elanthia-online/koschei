@@ -51,8 +51,11 @@ export default class Parser {
       .fmap(tag => {
         if (tag) return Object.assign(tag, {text : tag.text + text})
 
-        stack.push(
-          Tag.of("text", {} as Record<string, string>, text))
+        const text_tag = Tag.of("text", {} as Record<string, string>, text)
+        // self-closing text tag
+        if (text.endsWith("\r\n")) return Parser.broadcast(parser, text_tag)
+
+        stack.push(text_tag)
       })
   }
 
@@ -61,11 +64,11 @@ export default class Parser {
    if (name.toLowerCase().match(/^push/)) return
    // immediately fast-forward past pop tags so we process the root tag
    if (name.toLocaleLowerCase().match(/^pop/)) stack.pop()
-
+   // pop style flushes
    if (name == "style" && Str.is_empty(attributes.id.toString())) stack.pop()
-
-   if (name == "style" && Str.is_not_empty(attributes.id.toString())) return // do not pop pseudo opens for style tags
-
+   // do not pop pseudo opens for style tags
+   if (name == "style" && Str.is_not_empty(attributes.id.toString())) return 
+   // fetch the closed tag from our
    const tag = stack.pop() as Tag
    
    if (stack.length == 0) return Parser.broadcast(parser, tag)
@@ -81,18 +84,32 @@ export default class Parser {
     this.bridge = bridge
     this.socket = socket
     this.stack  = []
-    this.sax    = new saxes.SaxesParser({fragment: true, fileName: "game.feed"} as saxes.SaxesOptions)
+    this.sax    = new saxes.SaxesParser(
+      { fragment: true
+      , fileName: "gemstone"
+      } as saxes.SaxesOptions)
 
     this.sax.onopentag = 
-      tag => Parser.push_stack(this, this.stack, tag)
+      tag => bridge.log(["tag:open", tag]) && Parser.push_stack(this, this.stack, tag)
     this.sax.ontext = 
-      text => Parser.on_text(this, this.stack, text)
+      text => bridge.log(["text", text]) && Parser.on_text(this, this.stack, text)
     this.sax.onclosetag = 
-      tag => Parser.on_close_tag(this, this.stack, tag)
+      tag => bridge.log(["tag:close", tag]) && Parser.on_close_tag(this, this.stack, tag)
+    this.sax.onerror =
+      (err : Error) => bridge.log({err: err.message, stack: err.stack})
 
     this.socket.on("data", (data : BufferSource) => Pipe.of(data)
       .fmap(data => data.toString())
-      .tap(xml => bridge.emit("xml", xml))
-      .fmap(s => this.sax.write(s)))
+      .tap(xml => this.handle_xml(xml)))
+  }
+
+  handle_xml (xml : string) {
+    this.bridge.emit("xml", xml)
+    
+    if (this.stack.length == 0 && xml.endsWith("\r\n") && !xml.includes("<")) {
+      return this.sax.ontext(xml)
+    }
+    
+    this.sax.write(xml)
   }
 }

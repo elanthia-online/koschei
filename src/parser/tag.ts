@@ -8,6 +8,7 @@ export default class Tag {
   static INLINE_TAG_NAMES : Record<string, boolean> = 
     { b: true
     , a: true
+    , d: true
     }
 
   static MAPPINGS : Record<string, string> = 
@@ -22,7 +23,7 @@ export default class Tag {
   static TEXT_TAGS = TEXT_TAGS
 
   static is_inline (tag : Tag) : boolean {
-    return Tag.INLINE_TAG_NAMES[tag.name] || false
+    return tag && Tag.INLINE_TAG_NAMES[tag.name] || false
   }
 
   static is_text (tag : Tag) {
