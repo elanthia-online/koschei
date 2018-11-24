@@ -61,19 +61,25 @@ export default class Parser {
 
   static on_close_tag (parser : Parser, stack : ParserStack, {name, attributes} : saxes.SaxesTag) {
     // stay in stream
-   if (name.toLowerCase().match(/^push/)) return
-   // immediately fast-forward past pop tags so we process the root tag
-   if (name.toLocaleLowerCase().match(/^pop/)) stack.pop()
-   // pop style flushes
-   if (name == "style" && Str.is_empty(attributes.id.toString())) stack.pop()
-   // do not pop pseudo opens for style tags
-   if (name == "style" && Str.is_not_empty(attributes.id.toString())) return 
-   // fetch the closed tag from our
-   const tag = stack.pop() as Tag
-   
-   if (stack.length == 0) return Parser.broadcast(parser, tag)
+    if (name.toLowerCase().match(/^push/)) return
+    // immediately fast-forward past pop tags so we process the root tag
+    if (name.toLocaleLowerCase().match(/^pop/)) stack.pop()
+    // pop style flushes
+    if (name == "style" && Str.is_empty(attributes.id.toString())) stack.pop()
+    // do not pop pseudo opens for style tags
+    if (name == "style" && Str.is_not_empty(attributes.id.toString())) return 
+    // fetch the closed tag from our
+    const tag = stack.pop() as Tag
 
-   Parser.last_tag(stack).add_child(tag)
+    if (tag.pending_line && stack.length == 0) {
+      const text_tag = Tag.of("text", {} as Record<string, string>, "")
+      text_tag.add_child(tag)
+      return stack.push(text_tag)
+    }
+    
+    if (stack.length == 0) return Parser.broadcast(parser, tag)
+
+    Parser.last_tag(stack).add_child(tag)
  }
 
   socket : net.Socket;

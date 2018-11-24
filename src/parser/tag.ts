@@ -65,6 +65,8 @@ export default class Tag {
   id?       : string;
   attrs     : Record<string, string>;
   children  : Array<Tag>;
+  start?    : number;
+  end?      : number;
   constructor (name : string, attrs : Record<string, string>, text : string) {
     this.name     = Tag.normalize_name(name)
     this.text     = text
@@ -73,8 +75,22 @@ export default class Tag {
     if (attrs.id) this.id = attrs.id.toString()
   }
 
+  get inline () {
+    return Tag.is_inline(this)
+  }
+
+  get complete_inline () {
+    return this.inline && this.text.endsWith("\r\n")
+  }
+
+  get pending_line () {
+    return this.inline && !this.text.endsWith("\r\n")
+  }
+
   add_child (tag : Tag) {
+    tag.start = this.text.length
     this.text = this.text + tag.text
+    tag.end   = this.text.length
     //if (this.name == "b" && tag.name == "b") return Object.assign(this.attrs, tag.attrs)
     this.children.push(tag)
     return
