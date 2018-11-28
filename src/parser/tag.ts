@@ -9,6 +9,7 @@ export default class Tag {
     { b: true
     , a: true
     , d: true
+    , preset : true
     }
 
   static MAPPINGS : Record<string, string> = 
@@ -85,6 +86,10 @@ export default class Tag {
 
   get pending_line () {
     return this.inline && !this.text.endsWith("\r\n")
+  }
+
+  attr (key : string) {
+    return (this.attrs || {})[key]
   }
 
   add_child (tag : Tag) {

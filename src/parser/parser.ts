@@ -70,7 +70,7 @@ export default class Parser {
     if (name == "style" && Str.is_not_empty(attributes.id.toString())) return 
     // fetch the closed tag from our
     const tag = stack.pop() as Tag
-
+    if (!tag) return // bail
     if (tag.pending_line && stack.length == 0) {
       const text_tag = Tag.of("text", {} as Record<string, string>, "")
       text_tag.add_child(tag)
