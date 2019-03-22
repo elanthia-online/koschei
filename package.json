@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A bridge between the Lich-runtime and a Node.js runtime",
   "main": "dist/index.js",
+  "private": false,
   "scripts": {
     "test": "npx jest",
     "build": "npx tsc"
