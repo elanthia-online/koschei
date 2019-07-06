@@ -120,7 +120,7 @@ export default class Parser extends stream.Writable {
   }
 
   _write (chunk : string | Buffer, _enc : any, cb : Function | undefined) {
-    this.parse(chunk)
+    this.handle_xml(chunk.toString())
     if (typeof cb == "function") cb()
   }
 
