@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+const net = 
+  require("net")
+const fs = 
+  require("fs")
+const shape = 
+  { out  : String
+  , port : Number
+  }
+const ARGV = 
+  require("./util/argv").parse({ shape })
+const sock = 
+  net.connect({port: ARGV.port})
+const out = 
+  fs.createWriteStream(ARGV.out)
+const DONE =
+  `<done>:ok</done>\n`
+// capture a session
+sock.pipe(out)
+
+sock.on("data", d => console.log(d.toString()))
+
+const readline = require('readline').createInterface(
+  { input  : process.stdin
+  , output : process.stdout
+  })
+
+const cmd = ()=> readline.question(`>`, (input) => {
+  input = input.trim()
+  if (input == ":q") {
+    out.write(DONE)
+    process.exit(0)
+  }
+  console.log(`>${input}`)
+  sock.write(input + "\n")
+  cmd()
+})
+
+cmd()
