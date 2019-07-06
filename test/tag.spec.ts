@@ -18,5 +18,4 @@ test("Tag.maybe_merge() -> b -> b -> a", function () {
   component.add_child(b_2)
   Tag.maybe_merge(component)
   expect(b_2.name).toBe("monster")
-  console.log(b_2)
 })
