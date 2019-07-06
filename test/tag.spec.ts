@@ -8,7 +8,6 @@ test("Tag.maybe_merge() -> b -> a", function () {
   expect(b.name).toBe("monster")
 })
 
-
 test("Tag.maybe_merge() -> b -> b -> a", function () {
   const a   = Tag.of("a", {exist: "1324"}, "black cat")
   const b_1 = Tag.of("b", {})

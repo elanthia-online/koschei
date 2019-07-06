@@ -1,20 +1,18 @@
-import assert   from "assert"
-import events   from "events"
-import net      from "net"
+import stream   from "stream"
 import saxes    from "saxes"
 import Tag      from "./tag"
-import Bridge   from "../bridge"
 import Pipe     from "../util/pipe"
 import * as Str from "../util/string"
+import Log      from "../util/log"
 
 type ParserStack =
   | Array<Tag>
 
-export default class Parser {
+export default class Parser extends stream.Writable {
   static MAX_STACK_SIZE = 100
 
-  static of (bridge : Bridge, socket : net.Socket) {
-    return new Parser(bridge, socket)
+  static of () {
+    return new Parser()
   }
 
   static last_tag (stack: ParserStack) {
@@ -23,13 +21,12 @@ export default class Parser {
 
   static broadcast (parser : Parser, tag : Tag) {
     Tag.maybe_merge(tag)
-    parser.bridge.emit(tag.name, tag)
-    return parser.bridge.emit("tag", tag)
+    parser.emit(tag.name, tag)
+    return parser.emit("tag", tag)
   }
 
   static push_stack (parser : Parser, stack: ParserStack, {name, attributes} : saxes.SaxesTag) {
     const tag = Tag.of(name, attributes as Record<string, string>, attributes.text as string)
-
     // if we just opened a new non-child tag
     // we should ensure we clear the stack of
     // any previously opened text tags
@@ -50,12 +47,14 @@ export default class Parser {
       .fmap(Parser.last_tag)
       .fmap(tag => {
         if (tag) return Object.assign(tag, {text : tag.text + text})
-
         const text_tag = Tag.of("text", {} as Record<string, string>, text)
         // self-closing text tag
-        if (text.endsWith("\r\n")) return Parser.broadcast(parser, text_tag)
-
+        if (text.endsWith("\r\n")) {
+          Parser.broadcast(parser, text_tag)
+          return text_tag
+        }
         stack.push(text_tag)
+        return text_tag
       })
   }
 
@@ -81,36 +80,52 @@ export default class Parser {
 
     Parser.last_tag(stack).add_child(tag)
  }
-
-  socket : net.Socket;
   sax    : saxes.SaxesParser;
   stack  : ParserStack;
-  bridge : Bridge;
-  constructor (bridge : Bridge, socket : net.Socket) {
-    this.bridge = bridge
-    this.socket = socket
+  constructor () {
+    super()
+    /**
+     * this is the stack of open tags
+     */
     this.stack  = []
-    this.sax    = new saxes.SaxesParser(
+    /**
+     * create our internal Sax parser
+     */
+    this.sax = new saxes.SaxesParser(
       { fragment: true
       , fileName: "gemstone"
       } as saxes.SaxesOptions)
 
-    this.sax.onopentag = 
-      tag => bridge.log(["tag:open", tag]) && Parser.push_stack(this, this.stack, tag)
-    this.sax.ontext = 
-      text => bridge.log(["text", text]) && Parser.on_text(this, this.stack, text)
-    this.sax.onclosetag = 
-      tag => bridge.log(["tag:close", tag]) && Parser.on_close_tag(this, this.stack, tag)
-    this.sax.onerror =
-      (err : Error) => bridge.log({err: err.message, stack: err.stack})
+    this.sax.onopentag = tag => {
+      Log.info(":open_tag", tag)
+      Parser.push_stack(this, this.stack, tag)
+    }
+    this.sax.ontext = text => {
+      Log.info(":text", text)
+      Parser.on_text(this, this.stack, text)
+    }
+    this.sax.onclosetag = tag => {
+      Log.info(":close_tag", tag)
+      Parser.on_close_tag(this, this.stack, tag)
+    }
+    this.sax.onerror = err => {
+      Log.err(err)
+    }
+  }
 
-    this.socket.on("data", (data : BufferSource) => Pipe.of(data)
+  parse (data : string | Buffer) {
+    Pipe.of(data)
       .fmap(data => data.toString())
-      .tap(xml => this.handle_xml(xml)))
+      .tap(xml => this.handle_xml(xml))
+  }
+
+  _write (chunk : string | Buffer, _enc : any, cb : Function | undefined) {
+    this.parse(chunk)
+    if (typeof cb == "function") cb()
   }
 
   handle_xml (xml : string) {
-    this.bridge.emit("xml", xml)
+    this.emit("xml", xml)
     
     if (this.stack.length == 0 && xml.endsWith("\r\n") && !xml.includes("<")) {
       return this.sax.ontext(xml)

@@ -1,7 +1,2 @@
-import Bridge, {LichOptions} from "./bridge"
-import Tag from "./parser/tag"
-
-export const connect = 
-  (opts : LichOptions) => Bridge.of(opts)
-
-export {Bridge, Tag}
+import {Parser, Tag} from "./parser"
+export {Parser, Tag}
