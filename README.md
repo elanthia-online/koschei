@@ -1,4 +1,4 @@
-# @elanthia/koschei
+# @elanthia/koschei [![Build Status](https://travis-ci.org/elanthia-online/koschei.svg?branch=master)](https://travis-ci.org/elanthia-online/koschei)
 
 Typescript, event-driven, Stream support, perfect for your next integration with Gemstone like building Electron apps, TUIs, or whatever.  Wraps a SAX-based parser with robust error recovery and a stack-driven approach.
 
