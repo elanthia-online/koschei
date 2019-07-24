@@ -1,6 +1,8 @@
 import {Tag, Parser} from "../src/parser"
 import fs from "fs"
 
+jest.setTimeout(1_000)
+
 type ParserResult ={ 
   tags   : Tag[];
   parser : Parser;
@@ -62,13 +64,19 @@ test("Parser#parse() : text", async function () {
   return new Promise((ok, err)=> {
     const parser = Parser.of()
     const tags : Tag[] = []
-    parser.on("tag", tag => tags.push(tag))
-    parser.on("finish", () => {
+    const text = fs.createReadStream(__dirname + "/xml/text.xml")
+    parser.on("tag", 
+      tag => tags.push(tag))
+    text.on("data", 
+      data => parser.parse(data))
+
+    text.on("end", () => {
       expect(tags.length).toBeGreaterThan(0)
       const last_tag = tags.pop()
       expect(last_tag).toMatchObject({name: "text"})
       ok()
     })
-    fs.createReadStream(__dirname + "/xml/text.xml").pipe(parser)
+
+    
   })
 })

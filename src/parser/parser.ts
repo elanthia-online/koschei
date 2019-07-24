@@ -46,10 +46,16 @@ export default class Parser extends stream.Writable {
     Pipe.of(parser.stack)
       .fmap(Parser.last_tag)
       .fmap(tag => {
-        if (tag) return Object.assign(tag, {text : tag.text + text})
+        if (tag) {
+          Object.assign(tag, { text: tag.text + text });
+          if (!text.endsWith("\r\n")) return                
+          stack.pop()
+          Parser.broadcast(parser, tag)
+          return tag
+        }
         const text_tag = Tag.of("text", {} as Record<string, string>, text)
         // self-closing text tag
-        if (text.endsWith("\r\n")) {
+        if (text.endsWith("\n")) {
           Parser.broadcast(parser, text_tag)
           return text_tag
         }
@@ -134,7 +140,8 @@ export default class Parser extends stream.Writable {
     }
     
     this.sax.write(xml)
-    // flush any dangling text
-    if (this.stack.length == 0) this.sax.write(null)
+    // flush any dangling text, this happens
+    // when Lich asynchronously writes text midstream
+    if (this.stack.length == 0 || this.stack[0].name == "text") this.sax.write(null)
   }
 }
