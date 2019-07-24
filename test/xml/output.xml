@@ -1,0 +1,34 @@
+<output class="mono"/>
+Name: <a exist="-10,417,177" noun="Benark">Benark wizix</a> Race: Half-Elf  Profession: Wizard (not shown)
+Gender: Male    Age: 93    Expr: 4,044,036    Level:  66
+                  Normal (Bonus)  ...  Enhanced (Bonus)
+    Strength (STR):    65 (7)     ...   65 (7)
+Constitution (CON):    63 (6)     ...   63 (6)
+   Dexterity (DEX):   100 (30)    ...  100 (30)
+     Agility (AGI):    72 (21)    ...   72 (21)
+  Discipline (DIS):    87 (13)    ...   87 (13)
+        Aura (AUR):   100 (25)    ...  100 (25)
+       Logic (LOG):   100 (25)    ...  100 (25)
+   Intuition (INT):    81 (15)    ...   81 (15)
+      Wisdom (WIS):    96 (23)    ...   96 (23)
+   Influence (INF):    78 (19)    ...   78 (19)
+Mana:  274   Silver: 0
+<output class=""/>
+<prompt time="1563925593">&gt;</prompt>
+<output class="mono"/>
+          Level: 66                          Deeds: 4              
+     Experience: 4,044,036             Death's Sting: None
+Exp. until next: 79,964               Recent Deaths: 0              
+     Mental TPs: 0                            Fame: 18,206,790       
+   Physical TPs: 41                           Mana: 274/274 max
+ (934 Phy converted to Mnt)
+  Long-Term Exp: 0              
+<output class=""/>
+
+Your mind is as clear as a bell.
+
+You feel a strange sense of serenity and find that you are able to reflect on recent events with uncommon clarity and understanding.
+<prompt time="1563925597">&gt;</prompt>
+[53.4% to cap]
+[xp: no information yet]
+<done>:ok</done>

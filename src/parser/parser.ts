@@ -63,10 +63,12 @@ export default class Parser extends stream.Writable {
     if (name.toLowerCase().match(/^push/)) return
     // immediately fast-forward past pop tags so we process the root tag
     if (name.toLocaleLowerCase().match(/^pop/)) stack.pop()
-    // pop style flushes
+    // handle <style> nonsense
     if (name == "style" && Str.is_empty(attributes.id.toString())) stack.pop()
-    // do not pop pseudo opens for style tags
-    if (name == "style" && Str.is_not_empty(attributes.id.toString())) return 
+    if (name == "style" && Str.is_not_empty(attributes.id.toString())) return
+    // handle <output> nonsense
+    if (name == "output" && Str.is_empty(attributes.class.toString())) stack.pop()
+    if (name == "output" && Str.is_not_empty(attributes.class.toString())) return 
     // fetch the closed tag from our
     const tag = stack.pop() as Tag
     if (!tag) return // bail
@@ -132,5 +134,7 @@ export default class Parser extends stream.Writable {
     }
     
     this.sax.write(xml)
+    // flush any dangling text
+    if (this.stack.length == 0) this.sax.write(null)
   }
 }

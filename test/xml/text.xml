@@ -1,0 +1,7 @@
+--- Lich: to active.
+<preset id="debug">[to.fast_lookup] :err</preset>
+
+--- Lich: error: locate failed
+	to:55:in `go2_lnet'
+	to:73:in `go2'
+--- Lich: to has exited.
