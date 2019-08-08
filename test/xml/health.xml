@@ -1,0 +1,13 @@
+<output class="mono"/>
+You seem to be in one piece.
+
+    Maximum Health Points:<pushBold/> 165
+<popBold/>  Remaining Health Points: 165
+
+    Maximum Spirit Points: 10
+  Remaining Spirit Points: 10
+
+    Maximum Stamina Points: 110
+  Remaining Stamina Points: 110
+
+<output class=""/><done>:ok</done>

@@ -21,6 +21,20 @@ export default class Tag {
     return Tag.MAPPINGS[name] || name
   }
 
+  static is_fake_self_closing (name : string, attrs : Record<string, string>) {
+    return (
+         (name == "style" && attrs.id !== "") 
+      || (name == "output" && attrs.class !== "") 
+      || name.startsWith("push"))
+  }
+
+  static should_fast_forward (name: string, attrs : Record<string, string>) {
+    return (  
+         (name == "style" && attrs.id == "")
+      || (name == "output" && attrs.class == "")
+      || (name.startsWith("pop")))
+  }
+
   static TEXT_TAGS = TEXT_TAGS
 
   static is_inline (tag : Tag) : boolean {

@@ -47,8 +47,8 @@ export default class Parser extends stream.Writable {
       .fmap(Parser.last_tag)
       .fmap(tag => {
         if (tag) {
-          Object.assign(tag, { text: tag.text + text });
-          if (!text.endsWith("\r\n")) return                
+          Object.assign(tag, { text: tag.text + text })
+          if (!(Tag.is_inline(tag) && stack.length == 1)) return            
           stack.pop()
           Parser.broadcast(parser, tag)
           return tag
@@ -64,28 +64,25 @@ export default class Parser extends stream.Writable {
       })
   }
 
-  static on_close_tag (parser : Parser, stack : ParserStack, {name, attributes} : saxes.SaxesTag) {
+  static on_close_tag (parser : Parser, stack : ParserStack, {name, attributes : attrs} : saxes.SaxesTag) {
+    name = name.toLowerCase()
+    // pop this tag off
+    if (Tag.should_fast_forward(name, attrs as Record<string, string>)) { stack.pop() }
     // stay in stream
-    if (name.toLowerCase().match(/^push/)) return
-    // immediately fast-forward past pop tags so we process the root tag
-    if (name.toLocaleLowerCase().match(/^pop/)) stack.pop()
-    // handle <style> nonsense
-    if (name == "style" && Str.is_empty(attributes.id.toString())) stack.pop()
-    if (name == "style" && Str.is_not_empty(attributes.id.toString())) return
-    // handle <output> nonsense
-    if (name == "output" && Str.is_empty(attributes.class.toString())) stack.pop()
-    if (name == "output" && Str.is_not_empty(attributes.class.toString())) return 
+    if (Tag.is_fake_self_closing(name, attrs as Record<string, string>)) return
     // fetch the closed tag from our
     const tag = stack.pop() as Tag
-    if (!tag) return // bail
+     // bail because we have a null tag
+    if (!tag) return
+    // we have pending text that needs to be merged
     if (tag.pending_line && stack.length == 0) {
       const text_tag = Tag.of("text", {} as Record<string, string>, "")
       text_tag.add_child(tag)
       return stack.push(text_tag)
     }
-    
+    // we've reached a root tag so broadcast it
     if (stack.length == 0) return Parser.broadcast(parser, tag)
-
+    // merge the child tag onto its parent
     Parser.last_tag(stack).add_child(tag)
  }
   sax    : saxes.SaxesParser;

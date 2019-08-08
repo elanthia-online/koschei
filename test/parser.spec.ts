@@ -60,6 +60,13 @@ test("Parser#parse() : xml(:output)", async function () {
     .toBeGreaterThan(1)
 })
 
+test("Parser#parse() : xml(:health)", async function () {
+  const {tags, first, last} = await consume_xml("health.xml")
+  console.log(tags)
+  expect(tags.length).toBe(2)
+  expect(first).toMatchObject({name: "output"})
+})
+
 test("Parser#parse() : text", async function () {
   return new Promise((ok, err)=> {
     const parser = Parser.of()
@@ -73,10 +80,10 @@ test("Parser#parse() : text", async function () {
     text.on("end", () => {
       expect(tags.length).toBeGreaterThan(0)
       const last_tag = tags.pop()
-      expect(last_tag).toMatchObject({name: "text"})
+      expect(last_tag).toMatchObject({name: "done"})
+      const second_to_last = tags.pop()
+      expect(second_to_last).toMatchObject({name: "text"})
       ok()
     })
-
-    
   })
 })
