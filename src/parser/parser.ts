@@ -51,23 +51,23 @@ export default class Parser extends stream.Writable {
     Pipe.of(parser.stack)
       .fmap(Parser.last_tag)
       .fmap(tag => {
+
         if (tag) {
           Object.assign(tag, { text: tag.text + text })
-          if (!(Tag.is_inline(tag) && stack.length == 1)) return            
+          if (!tag.complete_inline) return 
+          if (stack.length > 1) return 
           stack.pop()
-          Parser.broadcast(parser, tag)
-          return tag
+          return Parser.broadcast(parser, tag)
         }
         
         const text_tag = Tag.of("text", {} as Record<string, string>, text)
-        
-        // self-closing text tag
-        if (text.endsWith("\n")) {
-          Parser.broadcast(parser, text_tag)
-          return text_tag
+        // closed text tag
+        if (text_tag.complete_inline) {
+          //console.log("Text::broadcast(%s, closed: %s)", text, text.endsWith("\r\n"))
+          return Parser.broadcast(parser, text_tag)
         }
+
         stack.push(text_tag)
-        return text_tag
       })
   }
 
@@ -91,6 +91,13 @@ export default class Parser extends stream.Writable {
     if (stack.length == 0) return Parser.broadcast(parser, tag)
     // merge the child tag onto its parent
     Parser.last_tag(stack).add_child(tag)
+
+    const last_tag = Parser.last_tag(stack)
+
+    if (last_tag.complete_inline) {
+      stack.pop()
+      return Parser.broadcast(parser, last_tag)
+    }
  }
   sax    : saxes.SaxesParser;
   stack  : ParserStack;

@@ -63,6 +63,7 @@ test("Parser#parse() : xml(:health)", async function () {
   const {tags, first, last} = await consume_xml("health.xml")
   expect(tags.length).toBe(2)
   expect(first).toMatchObject({name: "output"})
+  expect(first.children[0]).toMatchObject({name: "b"})
 })
 
 test("Parser#parse() : xml(:text)", async function () {
@@ -76,11 +77,13 @@ test("Parser#parse() : xml(:text)", async function () {
       data => parser.parse(data))
 
     text.on("end", () => {
-      expect(tags.length).toBe(1)
-      const last_tag = tags.pop()
+      expect(tags.length).toBe(2)
+      const last_tag = tags.pop() as Tag
       expect(last_tag).toMatchObject(
         {name: "text"
         })
+
+      expect(last_tag.children.length).toBe(1)
       ok()
     })
   })

@@ -16,6 +16,10 @@ export default class Tag {
     { monsterbold : "b"
     , bold        : "b"
     }
+
+  static is_terminated_text (tag: Tag) {
+    return tag.name == "text" && tag.text.endsWith("\r\n")
+  }
   static normalize_name (name : string) : string {
     name = name.toLowerCase().replace(/^(push|pop)/, "")
     return Tag.MAPPINGS[name] || name
@@ -38,7 +42,7 @@ export default class Tag {
   static TEXT_TAGS = TEXT_TAGS
 
   static is_inline (tag : Tag) : boolean {
-    return tag && Tag.INLINE_TAG_NAMES[tag.name] || false
+    return tag && Tag.INLINE_TAG_NAMES[tag.name] || tag.name == "text" || false
   }
 
   static is_text (tag : Tag) {
