@@ -6,9 +6,9 @@ enum TEXT_TAGS
 
 export default class Tag {
   static INLINE_TAG_NAMES : Record<string, boolean> = 
-    { b: true
-    , a: true
-    , d: true
+    { b      : true
+    , a      : true
+    , d      : true
     , preset : true
     }
 

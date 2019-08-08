@@ -1,0 +1,6 @@
+<a exist="-10778599" noun="Ondreian">Ondreian</a> just arrived.
+<prompt time="1565283950">&gt;</prompt>
+<component id='room players'></component>
+<a exist="-10778599" noun="Ondreian">Ondreian</a> just went <d cmd='go south'>south</d>.
+<prompt time="1565283951">&gt;</prompt>
+<done>:ok</done>

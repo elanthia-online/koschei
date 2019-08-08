@@ -25,13 +25,17 @@ export default class Parser extends stream.Writable {
     return parser.emit("tag", tag)
   }
 
-  static push_stack (parser : Parser, stack: ParserStack, {name, attributes} : saxes.SaxesTag) {
+  static on_open_tag (parser : Parser, stack: ParserStack, {name, attributes} : saxes.SaxesTag) {
     const tag = Tag.of(name, attributes as Record<string, string>, attributes.text as string)
     // if we just opened a new non-child tag
     // we should ensure we clear the stack of
     // any previously opened text tags
     if (stack.length == 1 && Tag.is_root(tag) && Tag.is_text(Parser.last_tag(stack))) {
       Parser.broadcast(parser, stack.pop() as Tag)
+    }
+
+    if (Tag.is_inline(tag) && stack.length == 0) {
+      stack.push(Tag.of("text", {}))
     }
 
     stack.push(tag) 
@@ -43,6 +47,7 @@ export default class Parser extends stream.Writable {
   }
 
   static on_text (parser: Parser, stack: ParserStack, text: string) {
+    if (stack.length == 0 && text.trim().length == 0) return
     Pipe.of(parser.stack)
       .fmap(Parser.last_tag)
       .fmap(tag => {
@@ -103,7 +108,7 @@ export default class Parser extends stream.Writable {
 
     this.sax.onopentag = tag => {
       Log.info(":open_tag", tag)
-      Parser.push_stack(this, this.stack, tag)
+      Parser.on_open_tag(this, this.stack, tag)
     }
     this.sax.ontext = text => {
       Log.info(":text", text)

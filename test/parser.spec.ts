@@ -62,7 +62,6 @@ test("Parser#parse() : xml(:output)", async function () {
 
 test("Parser#parse() : xml(:health)", async function () {
   const {tags, first, last} = await consume_xml("health.xml")
-  console.log(tags)
   expect(tags.length).toBe(2)
   expect(first).toMatchObject({name: "output"})
 })
@@ -86,4 +85,12 @@ test("Parser#parse() : text", async function () {
       ok()
     })
   })
+})
+
+test("Parser#parse() : xml(:inline_a_tag)", async function () {
+  const {tags, first, last} = await consume_xml("inline_a_tag.xml")
+  expect(first).toMatchObject({name: "text"})
+  expect(first.children.length).toBe(1)
+  expect(first.children[0].start).toBe(0)
+  expect(first.children[0]).toMatchObject({name: "a"})
 })
