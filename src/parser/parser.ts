@@ -58,7 +58,9 @@ export default class Parser extends stream.Writable {
           Parser.broadcast(parser, tag)
           return tag
         }
+        
         const text_tag = Tag.of("text", {} as Record<string, string>, text)
+        
         // self-closing text tag
         if (text.endsWith("\n")) {
           Parser.broadcast(parser, text_tag)

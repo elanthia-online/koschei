@@ -66,22 +66,22 @@ test("Parser#parse() : xml(:health)", async function () {
   expect(first).toMatchObject({name: "output"})
 })
 
-test("Parser#parse() : text", async function () {
+test("Parser#parse() : xml(:text)", async function () {
   return new Promise((ok, err)=> {
     const parser = Parser.of()
     const tags : Tag[] = []
-    const text = fs.createReadStream(__dirname + "/xml/text.xml")
+    const text = fs.createReadStream(__dirname + "/xml/lich_output.xml")
     parser.on("tag", 
       tag => tags.push(tag))
     text.on("data", 
       data => parser.parse(data))
 
     text.on("end", () => {
-      expect(tags.length).toBeGreaterThan(0)
+      expect(tags.length).toBeGreaterThan(1)
       const last_tag = tags.pop()
-      expect(last_tag).toMatchObject({name: "done"})
-      const second_to_last = tags.pop()
-      expect(second_to_last).toMatchObject({name: "text"})
+      expect(last_tag).toMatchObject(
+        {name: "text"
+        })
       ok()
     })
   })

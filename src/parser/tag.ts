@@ -9,7 +9,7 @@ export default class Tag {
     { b      : true
     , a      : true
     , d      : true
-    , preset : true
+    //, preset : true
     }
 
   static MAPPINGS : Record<string, string> = 
