@@ -6,10 +6,10 @@ enum TEXT_TAGS
 
 export default class Tag {
   static INLINE_TAG_NAMES : Record<string, boolean> = 
-    { b      : true
-    , a      : true
-    , d      : true
-    //, preset : true
+    { b      : true // creatures, gm messaging, etc
+    , a      : true // game objs
+    , d      : true // command
+    , preset : true // speech
     }
 
   static MAPPINGS : Record<string, string> = 

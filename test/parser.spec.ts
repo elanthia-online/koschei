@@ -2,7 +2,6 @@ import {Tag, Parser} from "../src/parser"
 import fs from "fs"
 
 jest.setTimeout(1_000)
-
 type ParserResult ={ 
   tags   : Tag[];
   parser : Parser;
@@ -77,7 +76,7 @@ test("Parser#parse() : xml(:text)", async function () {
       data => parser.parse(data))
 
     text.on("end", () => {
-      expect(tags.length).toBeGreaterThan(1)
+      expect(tags.length).toBe(1)
       const last_tag = tags.pop()
       expect(last_tag).toMatchObject(
         {name: "text"
